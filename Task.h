@@ -13,10 +13,6 @@ namespace Sawn {
 
     class Task {
     public:
-        Task() {}
-        // std::function<void()>&& func 可以调用任何对象，右值引用
-        Task(std::function<void()>&& func, size_t id = 0);
-
         // 获取没有完成的任务
         size_t getTaskNum();
         union {
@@ -36,6 +32,12 @@ namespace Sawn {
         // 先前的任务没有完成
         int unfinished_dependents_num_ = 0;
 
+
+    public:
+        Task() {}
+        // std::function<void()>&& func 可以调用任何对象，右值引用
+        Task(std::function<void()>&& func, size_t id = 0);
+
         void addChild(Task*);
 
         void precede(Task* task);
@@ -43,6 +45,7 @@ namespace Sawn {
         void succeed(Task* task);
 
         void run();
+
     };
 }
 

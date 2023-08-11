@@ -56,7 +56,7 @@ inline ThreadPool::ThreadPool(size_t threads) : stop(false) {
         });
     }
 }
-/*
+
 template<typename F, typename ... Args>
 std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F&& f, Args&&... args)
 {
@@ -84,13 +84,13 @@ std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F
         if (stop)
             throw std::runtime_error("enqueue on stopped ThreadPool");
 //        tasks.emplace(task);
-        tasks.emplace([task](){ task(); });
+        tasks.emplace(task);
     }
     condtion.notify_one();
     return future;
 }
-*/
 
+/*
 template<typename F, typename ... Args>
 std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F&& f, Args&&... args)
 {
@@ -109,13 +109,19 @@ std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F
         if(stop)
             throw std::runtime_error("enqueue on stopped ThreadPool");
 
-        tasks.emplace([task](){ (*task)(); });
+//        tasks.emplace([task](){ (*task)(); });
+        // 有一个lambda表达式，返回值是task，无参数，执行*task任务，所以我这里想加上对于函数返回值的判断
+        tasks.emplace([task]() {
+            (*task)(); // 执行task
+            if constexpr (!std::is_void_v<return_type>) { // 有返回值
+                res.set_value(task -> get_return_value());
+            }
+        });
     }
     condtion.notify_one();
     return res;
-
 }
-
+*/
 inline ThreadPool::~ThreadPool() {
     {
         std::unique_lock<std::mutex> lock(queue_mutex);

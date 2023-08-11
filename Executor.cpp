@@ -21,22 +21,22 @@ namespace Sawn {
 
         spawn(taskf);
         while (totalUnFinishedTaskNum_ > 0) {
-            queue_.wait();
-            if (queue_.empty()) {
-                assert(false);
-            }
+            queue_.wait(); // 停止，等到队列非空才继续行动
+//            if (queue_.empty()) {
+//                assert(false);
+//            }
 
             Msg msg = queue_.front();
             //在pop,之前，先把msg push到队列，从而保证队列始终非空
             if (msg.taskState == TaskState::FINISH) {
                 totalUnFinishedTaskNum_ -= 1;
                 if (totalUnFinishedTaskNum_ == 0) {
-
+                    break; // 完成任务
                 }
                 for (Task* task: msg.task -> successors_) {
                     task -> unfinished_dependents_num_ -= 1;
                     if (task -> unfinished_dependents_num_ == 0)
-                        spawn(task);
+                        spawn(task); // 执行这个任务
                 }
                 if (msg.task -> parent) {
                     msg.task -> parent -> unfinished_children_num_ -= 1;
@@ -56,10 +56,10 @@ namespace Sawn {
 
     void Executor::spawn(Task* task) {
         //如果有子任务，先spawn子任务
-        if (!task->children_.empty()) {
+        if (!task -> children_.empty()) {
             std::vector<Task*> srcs;
-            for (auto& it : task->children_) {
-                if (it->dependents_.empty()) {
+            for (auto it : task->children_) {
+                if (it -> dependents_.empty()) {
                     srcs.push_back(it);
                 }
             }
@@ -68,12 +68,12 @@ namespace Sawn {
             }
         }
         else {
-            auto ftr = pool_->enqueue([task, this]() {
+            auto ftr = pool_ -> enqueue([task, this]() {
                 task->run();
-
                 Msg msg;
                 msg.task = task;
                 notify(msg);
+
             });
         }
     }

@@ -21,7 +21,7 @@ namespace Sawn {
         size_t totalUnFinishedTaskNum_ = 0;
         std::condition_variable condition_;
         ThreadPool* pool_ = nullptr;
-        MsgQueue queue_;
+        MsgQueue queue_; // 保护Msg队列，记录任务与完成状态
 
     };
 }
