@@ -3,54 +3,47 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "ThreadPool.h"
 
-std::mutex m;
-std::condition_variable cv;
-std::string data;
-bool ready = false;
-bool processed = false;
-
-void worker_thread()
-{
-    // Wait until main() sends data
-    std::unique_lock<std::mutex> lk(m);
-    //子进程的中wait函数对互斥量进行解锁，同时线程进入阻塞或者等待状态。
-    cv.wait(lk, []{return ready;});
-
-    // after the wait, we own the lock.
-    std::cout << "Worker thread is processing data\n";
-    data += " after processing";
-
-    // Send data back to main()
-    processed = true;
-    std::cout << "Worker thread signals data processing completed\n";
-
-    // Manual unlocking is done before notifying, to avoid waking up
-    // the waiting thread only to block again (see notify_one for details)
-    lk.unlock();
-    cv.notify_one();
+template <typename T>
+static T add(T x, T y) {
+    return x + y;
 }
+template <typename T>
+static T sub(T x, T y) {
+    return x - y;
+}
+template <typename T>
+static T mul(T x, T y) {
+    return x * y;
+}
+
+int sum(int a, int b) { return add(a, b) + sub(a, b) + mul(a, b); }
 
 int main()
 {
-    std::thread worker(worker_thread);
+    auto threadPool = ThreadPool(4);
+    int a = 10;
+    int b = 20;
 
-    data = "Example data";
-    // send data to the worker thread
-    {
-        //主线程堵塞在这里，等待子线程的wait()函数释放互斥量。
-        std::lock_guard<std::mutex> lk(m);
-        ready = true;
-        std::cout << "main() signals data ready for processing\n";
+    std::vector<std::future<int>> futures;
+    auto add_fut = threadPool.enqueue([a, b]() { return add(a, b); });
+    auto sub_fut = threadPool.enqueue([a, b]() { return sub(a, b); });
+    auto mul_fut = threadPool.enqueue([a, b]() { return mul(a, b); });
+    auto params_fut = threadPool.enqueue(sum, a, b);
+    futures.push_back(std::move(add_fut));
+    futures.push_back(std::move(sub_fut));
+    futures.push_back(std::move(mul_fut));
+    futures.push_back(std::move(params_fut));
+
+    for (auto& future : futures) {
+        try {
+            int result = future.get();
+            std::cout << "Result: " << result << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Exception occurred: " << e.what() << std::endl;
+        }
     }
-    cv.notify_one(); // unlock
 
-    // wait for the worker
-    {
-        std::unique_lock<std::mutex> lk(m);
-        cv.wait(lk, []{return processed;});
-    }
-    std::cout << "Back in main(), data = " << data << '\n';
-
-    worker.join();
+    return 0;
 }

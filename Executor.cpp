@@ -73,7 +73,6 @@ namespace Sawn {
                 Msg msg;
                 msg.task = task;
                 notify(msg);
-
             });
         }
     }

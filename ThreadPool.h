@@ -56,7 +56,7 @@ inline ThreadPool::ThreadPool(size_t threads) : stop(false) {
         });
     }
 }
-
+/*
 template<typename F, typename ... Args>
 std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F&& f, Args&&... args)
 {
@@ -89,7 +89,7 @@ std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F
     condtion.notify_one();
     return future;
 }
-
+*/
 /*
 template<typename F, typename ... Args>
 std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F&& f, Args&&... args)
@@ -122,6 +122,33 @@ std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F
     return res;
 }
 */
+
+template<typename F, typename ... Args>
+std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F&& f, Args&&... args)
+{
+    using return_type = typename std::invoke_result<F, Args...>::type;
+    auto task = std::make_shared< std::packaged_task<return_type()> >(
+            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+    );
+
+    std::future<return_type> res = task -> get_future();
+    // 对的，这行代码在创建 `std::packaged_task` 后，使用 `get_future()` 函数获取一个与该任务相关联的 `std::future` 对象，
+    // 以便稍后可以通过这个 `std::future` 对象来获取异步操作的结果。这是一种将任务和其结果关联起来的方式，方便管理异步操作的执行和结果获取。
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+
+        // don't allow enqueueing after stopping the pool
+        if(stop)
+            throw std::runtime_error("enqueue on stopped ThreadPool");
+
+//        tasks.emplace([task](){ (*task)(); });
+        // 有一个lambda表达式，返回值是task，无参数，执行*task任务，所以我这里想加上对于函数返回值的判断
+        tasks.emplace([task](){ (*task)(); });
+    }
+    condtion.notify_one();
+    return res;
+}
+
 inline ThreadPool::~ThreadPool() {
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
