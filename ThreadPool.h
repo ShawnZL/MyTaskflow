@@ -142,7 +142,6 @@ std::future<typename std::invoke_result<F, Args...>::type> ThreadPool::enqueue(F
             throw std::runtime_error("enqueue on stopped ThreadPool");
 
 //        tasks.emplace([task](){ (*task)(); });
-        // 有一个lambda表达式，返回值是task，无参数，执行*task任务，所以我这里想加上对于函数返回值的判断
         tasks.emplace([task](){ (*task)(); });
     }
     condtion.notify_one();

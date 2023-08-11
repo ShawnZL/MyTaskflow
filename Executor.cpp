@@ -67,14 +67,14 @@ namespace Sawn {
                 spawn(it);
             }
         }
-        else {
-            auto ftr = pool_ -> enqueue([task, this]() {
-                task->run();
-                Msg msg;
-                msg.task = task;
-                notify(msg);
-            });
-        }
+//        else {
+//            auto ftr = pool_ -> enqueue([task, this]() {
+//                task->run();
+//                Msg msg;
+//                msg.task = task;
+//                notify(msg);
+//            });
+//        }
     }
 
     void Executor::notify(const Msg& msg) {

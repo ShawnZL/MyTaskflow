@@ -90,12 +90,6 @@ build CMakeFiles/MyTaskflow.dir/MsgQueue.cpp.o: CXX_COMPILER__MyTaskflow_Debug /
   OBJECT_DIR = CMakeFiles/MyTaskflow.dir
   OBJECT_FILE_DIR = CMakeFiles/MyTaskflow.dir
 
-build CMakeFiles/MyTaskflow.dir/Executor.cpp.o: CXX_COMPILER__MyTaskflow_Debug /Users/shawnzhao/Code/MyTaskflow/Executor.cpp || cmake_object_order_depends_target_MyTaskflow
-  DEP_FILE = CMakeFiles/MyTaskflow.dir/Executor.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk -std=gnu++2a
-  OBJECT_DIR = CMakeFiles/MyTaskflow.dir
-  OBJECT_FILE_DIR = CMakeFiles/MyTaskflow.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target MyTaskflow
@@ -104,7 +98,7 @@ build CMakeFiles/MyTaskflow.dir/Executor.cpp.o: CXX_COMPILER__MyTaskflow_Debug /
 #############################################
 # Link the executable MyTaskflow
 
-build MyTaskflow: CXX_EXECUTABLE_LINKER__MyTaskflow_Debug CMakeFiles/MyTaskflow.dir/main.cpp.o CMakeFiles/MyTaskflow.dir/Task.cpp.o CMakeFiles/MyTaskflow.dir/MsgQueue.cpp.o CMakeFiles/MyTaskflow.dir/Executor.cpp.o
+build MyTaskflow: CXX_EXECUTABLE_LINKER__MyTaskflow_Debug CMakeFiles/MyTaskflow.dir/main.cpp.o CMakeFiles/MyTaskflow.dir/Task.cpp.o CMakeFiles/MyTaskflow.dir/MsgQueue.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk
   OBJECT_DIR = CMakeFiles/MyTaskflow.dir
   POST_BUILD = :
